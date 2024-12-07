@@ -1,0 +1,169 @@
+def mainmenu():
+    height = None
+    weight = None
+    bmr_value = None
+    bmi = None
+    while True:    
+        page_option = input("Welcome to FitMeter! Please select your desire ('BMI' 'BMR' 'Workout' 'FoodPlan' 'Exit' )")
+        if page_option == 'BMI':
+            if height is None or weight is None:
+                height, weight = get_user_details()
+            bmi = bmi_page(height, weight)
+        elif page_option == 'BMR':
+            if height is None or weight is None:
+                height, weight = get_user_details()
+            bmr_value = bmr_page(height, weight)
+        elif page_option == 'Workout':
+            if height is None or weight is None or bmi is None or bmr_value is None:
+                print("Please answer a few questions for more accurate results!")
+            if height is None or weight is None:
+                print("Please provide your height and weight first.")
+                height, weight = get_user_details()
+            if bmi is None:
+                bmi = bmi_page(height, weight)
+            if bmr_value is None:  
+                bmr_value = bmr_page(height, weight)
+            workout_page(bmi, bmr_value, height, weight)
+        elif page_option == 'Exit':
+            print("Thank you for using FitMeter! Stay healthy!")
+            break
+        elif page_option == 'FoodPlan':
+            if bmr_value is not None:
+                food_plan_page(bmr_value)
+            else:
+                print("You need to calculate your BMR first.")
+            if height is None or weight is None:
+                height, weight = get_user_details()
+                bmr_value = bmr_page(height, weight)
+            if bmr_value is not None:
+                food_plan_page(bmr_value)
+        else:
+            print("Invalid option. Please choose 'BMI', 'Workout', or 'Exit'.")
+            
+
+def get_user_details():
+    print("Let's gather your height and weight details!")
+    feet = int(input("Enter your height in feet: "))
+    inches = int(input("Enter additional height in inches: "))
+    height = (feet * 12) + inches
+    weight = float(input("Enter your weight in pounds: "))
+    print("Height: " + str(height) + " inches, Weight: " + str(weight) + " pounds.")
+    return height, weight
+
+ 
+def bmi_page(height, weight):
+    print("Let's calculate your BMI!")
+    yourbmi = (weight * 703) / (height * height)
+    yourbmi = round(yourbmi, 1)
+    print("Your BMI is " + str(yourbmi))
+    print("A healthy weight lies between 18.5-24.9 on the BMI")
+    
+    if yourbmi <= 18.4:
+        print("You are underweight!")
+        targetbmi = ((height ** 2) * 18.5) / 703
+        weightgain = round(targetbmi - weight)
+        print("To reach a healthy BMI, you'll have to gain about " + str(weightgain) + " pounds!")
+    elif yourbmi <= 24.9:
+        print("You are a healthy weight!")
+    elif yourbmi <= 29.9:
+        print("You are overweight!")
+        targetbmi = ((height ** 2) * 24.9) / 703
+        weightloss = round(weight - targetbmi, 1)
+        print("To reach a healthy BMI, you'll have to lose about " + str(weightloss) + " pounds!")
+    else:
+        print("You are obese!")
+        targetbmi = ((height ** 2) * 24.9) / 703
+        weightloss = round(weight - targetbmi, 1)
+        print("To reach a healthy BMI, you'll have to lose about " + str(weightloss) + " pounds!")
+
+    return yourbmi 
+
+def bmr_page(height, weight):
+    print("Let's calculate your BMR (Basal Metabolic Rate)!")
+    try:
+        gender = input("What is your gender? (M/F): ")
+        age = int(input("Enter your age in years: "))
+    except ValueError:
+        print("Invalid input. Please enter numerical values only.")
+        return None
+
+    if gender == 'M':
+        bmr = 66 + (6.23 * weight) + (12.7 * height) - (6.8 * age)
+    elif gender == 'F':
+        bmr = 655 + (4.35 * weight) + (4.7 * height) - (4.7 * age)
+    else:
+        print("Invalid gender input. Please enter 'Male' or 'Female'.")
+        return None
+
+    print("Your BMR is " + str(round(bmr, 1)) + " calories per day.")
+    print("This is the number of calories your body needs to perform basic functions while at rest.")
+    return bmr
+    
+def food_plan_page(bmr):
+    print("Food Plan and Calorie Recommendations:")
+    goal = input("Would you like to (lose/gain/maintain) weight?: ")
+    
+    if goal == 'lose':
+        calorie_deficit = bmr - 500
+        print("To lose weight, you should aim for a daily calorie intake of around " + str(round(calorie_deficit, 0)) + " calories.")
+        print("This will help you lose approximately 1 pound per week.")
+    elif goal == 'maintain':
+        print("To maintain your weight, you should aim for a daily calorie intake of around " + str(round(bmr, 0)) + " calories.")
+    elif goal == 'gain':
+        calorie_surplus = bmr + 500
+        print("To gain weight, you should aim for a daily calorie intake of around " + str(round(calorie_surplus, 0)) + " calories.")
+        print("This will help you gain approximately 1 pound per week.")
+    else:
+        print("Invalid goal. Please choose 'lose', 'maintain', or 'gain'.")
+    print("For more personalized food plans, consider consulting a dietitian or nutritionist.")
+
+def workout_page(bmi, bmr_value, height, weight):
+    if bmi is None or bmr_value is None:  
+        print("You need to calculate your BMI and BMR first!")
+        if bmi is None:
+            bmi = bmi_page(height, weight)
+        if bmr_value is None:
+            bmr_value = bmr_page(height, weight)
+    
+    if bmi is None:  
+        print("Error calculating BMI. Please try again.")
+        return
+    if bmr_value is None: 
+        print("Error calculating BMR. Please try again.")
+        return
+    
+    print("Workout Recommendations Based on Your BMI and BMR")
+    
+
+    healthy_bmi_min = 18.5
+    healthy_bmi_max = 24.9
+    
+   
+    healthy_weight_min = ((height ** 2) * healthy_bmi_min) / 703
+    healthy_weight_max = ((height ** 2) * healthy_bmi_max) / 703
+    
+    if bmi < healthy_bmi_min:  
+        target_bmi = healthy_bmi_min
+        weight_gain = healthy_weight_min - weight
+        weeks_to_gain = round(weight_gain / 0.5)  
+        print("Your BMI is below the healthy range. You need to gain about {round(weight_gain, 1)} pounds.")
+        print("To achieve this, aim for a strength-focused workout routine over the next {weeks_to_gain} weeks.")
+        print("- Include compound movements (e.g., squats, deadlifts, bench press) and progressive overload.")
+        print("- Ensure a calorie surplus of around 500 calories daily (BMR + 500).")
+    elif healthy_bmi_min <= bmi <= healthy_bmi_max:  
+        print("Your BMI is within the healthy range! Focus on maintaining your fitness level.")
+        print("- Perform a balanced routine with strength training (3x/week) and cardio (2-3x/week).")
+        print("- Aim to maintain your daily calorie intake around your BMR.")
+    else: 
+        target_bmi = healthy_bmi_max
+        weight_loss = weight - healthy_weight_max
+        weeks_to_lose = round(weight_loss / 1)  
+        print("Your BMI is above the healthy range. You need to lose about " + str(round(weight_loss, 1)) + " pounds.")
+        print("To achieve this, follow a calorie deficit plan and a workout routine over the next " + str(weeks_to_lose) + " weeks.")
+        print("- Incorporate 30-60 minutes of moderate to high-intensity cardio 5x/week (e.g., running, cycling).")
+        print("- Add 2-3 days of strength training to preserve muscle mass.")
+        print("- Aim for a daily calorie deficit of around 500 calories (BMR - 500).")
+    
+    print("Always consult a fitness professional or trainer for personalized workout plans.")
+
+mainmenu()
